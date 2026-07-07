@@ -1,0 +1,21 @@
+Flask==3.0.3
+google-adk
+
+# Core Web Framework
+Flask==3.0.3
+Werkzeug==3.0.3
+
+# Data Processing & Utilities
+numpy==1.26.4
+pandas==2.2.2
+python-dateutil==2.9.0.post0
+
+# API & Networking Utilities
+requests==2.32.3
+urllib3==2.2.1
+
+# Environment Configuration
+python-dotenv==1.0.1
+
+# Production WSGI Server (For Deployment Setup)
+gunicorn==22.0.0
