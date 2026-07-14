@@ -192,3 +192,21 @@ Update this admin password immediately in a production deployment.
 - For production, replace the Flask `secret_key` logic with a secure environment variable.
 - Confirm `data/` directory exists and is writable before running the app.
 - If you want to enable real ADK integration, install `google-adk` and remove the fallback only after verifying compatibility.
+
+🚀 Live Demo
+You can view the project in action here:
+
+👉 View Live Application
+
+(Note: Click the link to explore the interface and test the application's features.)
+
+🛠️ Deployment Details
+This project is optimized for performance and reliability:
+
+Platform: Vercel (Cloud Hosting)
+
+Backend: Flask (Python)
+
+Frontend: HTML, CSS, JavaScript
+
+Status: ✅ Live & Operational
