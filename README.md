@@ -197,7 +197,7 @@ Update this admin password immediately in a production deployment.
 You can view the project in action here:
 
 👉 View Live Application
-[https://sky-ecoai-lr33et8zg-iqra15.vercel.app](https://sky-ecoai-lr33et8zg-iqra15.vercel.app)
+https://sky-ecoai.vercel.app/
 
 ### 🛠️ Deployment Details
 This project is optimized for performance and reliability:
