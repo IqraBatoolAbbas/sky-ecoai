@@ -31,7 +31,7 @@ The heart of Sky.EcoAI is the `EcoRouteAgent` component in `route_agent.py`.
 This route optimization engine demonstrates the agentic AI concept by acting as a decision-making component that analyzes input context, selects a vehicle profile, and generates route guidance dynamically.
 
 ### Agentic AI Workflow and Flow
-![Agentic Workflow](static/images/workflow.jpg)
+![Agentic Workflow](static/images/workflow.jpeg)
 
 Sky.EcoAI applies an agentic AI concept in these flows:
 
