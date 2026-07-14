@@ -1,4 +1,6 @@
-from flask import Flask, jsonify, render_template, request, session, redirect, url_for
+from functools import wraps
+import os
+from flask import Flask, Response, jsonify, render_template, render_template_string, request, session, redirect, url_for
 from route_agent import EcoRouteAgent
 from auth_store import UserStore, ValidationError
 from ledger_store import LedgerStore
@@ -42,7 +44,7 @@ def inject_current_user():
     user_context = session.get("user")
     
     # 🚀 CHECK STATE: Agar user explicitly signup, login, ya home page par hai
-    # toh layout bilkul clear honi chahiye (No mock data context to avoid mixing)
+
     if request.path in ["/signup", "/login", "/", "/about"]:
         return {"current_user": user_context, "current_admin": session.get("admin")}
         
@@ -64,6 +66,7 @@ def workspace():
 
 @app.get("/dashboard")
 def dashboard_view():
+    print(f"DEBUG SESSION: {session.get('user')}")
     if not session.get("user"):
         return redirect(url_for("login_view")) # Logout ke baad login par bhejo!
     return render_template("dashboard.html")
@@ -184,53 +187,26 @@ def api_update_account():
         return jsonify({"error": "You must be logged in to update account settings."}), 401
 
     data = request.get_json(silent=True) or {}
-    name = html.escape(data.get("name", "").strip()) if data.get("name") else None
-    preferences = data.get("preferences") or {}
+    
+    # 🚨 FIX: Keyword arguments ki jagah ek Dictionary (new_data) banayein
+    update_payload = {}
+    if data.get("name"):
+        update_payload["name"] = html.escape(data.get("name").strip())
+    if data.get("preferences"):
+        update_payload["preferences"] = data.get("preferences")
 
     try:
-        user = users.update_user(session["user"]["email"], name=name, preferences=preferences)
+        # Sahi call: (email, payload_dictionary)
+        user = users.update_user(session["user"]["email"], update_payload)
         session["user"] = user
+        session.modified = True # Ensure session updates
         return jsonify(user), 200
     except ValidationError as e:
         return jsonify({"error": str(e)}), 400
     except Exception as e:
+        # Agar error yahan bhi show na ho, toh print karein
+        print(f"DEBUG: {str(e)}") 
         return jsonify({"error": f"Account Update Error: {str(e)}"}), 500
-
-@app.post("/api/account/password")
-def api_change_password():
-    if not session.get("user"):
-        return jsonify({"error": "You must be logged in to change your password."}), 401
-
-    data = request.get_json(silent=True) or {}
-    try:
-        users.change_password(
-            session["user"]["email"],
-            data.get("current_password", ""),
-            data.get("new_password", ""),
-        )
-        return jsonify({"ok": True}), 200
-    except ValidationError as e:
-        return jsonify({"error": str(e)}), 400
-    except Exception as e:
-        return jsonify({"error": f"Password Update Error: {str(e)}"}), 500
-
-@app.post("/api/account/delete")
-def api_delete_account():
-    if not session.get("user"):
-        return jsonify({"error": "You must be logged in to delete your account."}), 401
-
-    data = request.get_json(silent=True) or {}
-    try:
-        users.delete_user(session["user"]["email"], data.get("password", ""))
-        ledger.clear(session["user"]["email"])
-        session.pop("user", None)
-        return jsonify({"ok": True}), 200
-    except ValidationError as e:
-        return jsonify({"error": str(e)}), 400
-    except Exception as e:
-        return jsonify({"error": f"Account Deletion Error: {str(e)}"}), 500
-
-
 # ------------------------------------------------------------------
 # 📒 PER-ACCOUNT LEDGER (Persisted Server-Side)
 # ------------------------------------------------------------------
@@ -378,13 +354,10 @@ def api_premium_checkout():
 
     try:
         # 1. User records ko DB/Storage mein upgrade karein
-        # Agar pro hai toh db handler ko target_plan pass kar sakte hain
-        user = users.upgrade_to_premium(session["user"]["email"], card_number[-4:])
-        
-        # Enforce target plan in data structure manually
-        user["plan"] = target_plan
+        user = users.upgrade_to_premium(session["user"]["email"], card_number[-4:], target_plan)
+            
         session["user"] = user
-        
+            
         # 💥 DYNAMIC TIER INITIALIZATION MATRIX
         if target_plan == "pro":
             session["is_premium"] = True
@@ -422,6 +395,8 @@ def api_admin_login():
     try:
         admin = admin_store.verify_admin(data.get("email", ""), data.get("password", ""))
         session["admin"] = admin
+        session["is_admin"] = True
+        session.permanent = True
         return jsonify(admin), 200
     except AdminAuthError as e:
         return jsonify({"error": str(e)}), 401
@@ -432,6 +407,7 @@ def admin_required():
 @app.get("/admin/logout")
 def admin_logout_view():
     session.pop("admin", None)
+    session.pop("is_admin", None)
     return redirect(url_for("admin_login_view"))
 
 @app.get("/admin")
@@ -514,8 +490,6 @@ def optimize_route():
     vehicle = data.get("vehicle", "").strip().lower()
     
     # 🚀 OPTIONAL SECURITY MATRIX:
-    # Agar batch queries ya rapid multi-agent tracking payload aa raha hai 
-    # aur user Pro nahi hai, toh backend block lagayega:
     is_batch_request = data.get("is_batch", False)
     if is_batch_request and not session.get("is_pro"):
         return jsonify({"error": "Batch route simulation requires Professional Grid Suite (Pro)."}), 403
@@ -532,13 +506,11 @@ def optimize_route():
 @app.route('/admin/reply/<ticket_id>', methods=['POST'])
 def admin_reply(ticket_id):
     # Admin session check (Security)
-    if not session.get('is_admin'): 
+    if not admin_required():
         return jsonify({"error": "Unauthorized"}), 403
     
     reply_text = request.form.get('reply')
-    # Yahan apne database/json mein update karein
-    # ledger.update_ticket_response(ticket_id, reply_text)
-    
+
     return jsonify({"status": "success", "message": "Reply sent to user!"})
 
 
@@ -592,28 +564,125 @@ def user_logout():
     return jsonify({"status": "success", "message": "Logged out successfully"}), 200
 
 
-@app.get("/api/export/csv")
+@app.route("/api/export/csv")
 def api_export_csv():
-    # Security Check: User logged in hona chahiye
-    if not session.get("user"):
+    user = session.get("user")
+    if not user:
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    # Session aur Database plan check karein
+    is_premium = session.get("is_premium", False)
+    plan = user.get("plan", "free")
+    
+    try:
+        # Ledger store ka method call karein
+        entries = ledger.get_premium_csv_data(user["email"], is_premium, plan)
+        
+        # CSV generation
+        csv_data = "Query,Engine,Sprint CO2(g),Green CO2(g),Saved CO2(g)\n"
+        for entry in entries:
+            csv_data += f"{entry.get('query','')},{entry.get('engine','')},{entry.get('sprintCo2','')},{entry.get('greenCo2','')},{entry.get('saved','')}\n"
+        
+        return Response(
+            csv_data,
+            mimetype="text/csv",
+            headers={"Content-Disposition": "attachment; filename=sky_eco_telemetry.csv"}
+        )
+    except PermissionError as e:
+        return jsonify({"error": str(e)}), 403
+    except Exception as e:
+        return jsonify({"error": "System Error: " + str(e)}), 500
+@app.route('/update_profile', methods=['POST'])
+def update_profile():
+    try:
+        user_session = session.get("user")
+        if not user_session:
+            return jsonify({"error": "No session found"}), 401
+        
+        user_email = session.get("user")["email"]
+        data_to_update = {"name": request.form.get('name')}
+        
+        # Test: kya ye line chal rahi hai?
+        users.update_user(user_email, data_to_update)
+        session["user"] = users._read() # Refresh object from file
+        session.modified = True
+        return jsonify({"success": True})
+    except Exception as e:
+        print(f"DEBUG ERROR: {str(e)}") # Ye terminal mein error print karega
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/agent/predict', methods=['GET'])
+def get_agent_prediction():
+    user = session.get("user")
+    if not user:
         return jsonify({"error": "Unauthorized"}), 401
         
-    user_email = session["user"]["email"]
-    entries = ledger.get_entries(user_email) or []
+    email = user.get("email", "").strip().lower()
+    user_entries = ledger.get_entries(email)
     
-    # CSV generation data headers setup
-    csv_data = "ID,Query,Engine,Sprint CO2(g),Green CO2(g),Saved CO2(g),Favorite\n"
-    for entry in entries:
-        csv_data += f"{entry.get('id','')},{entry.get('query','')},{entry.get('engine','')},{entry.get('sprintCo2','')},{entry.get('greenCo2','')},{entry.get('saved','')},{entry.get('favorite','')}\n"
+    # DEBUG: Console mein entries check karne ke liye
+    print(f"DEBUG: Checking ledger for email: '{email}'")
+    
+    if not user_entries:
+        return jsonify({"status": "waiting"})
         
-    # File handling response mapping wrapper injection
-    from flask import Response
-    return Response(
-        csv_data,
-        mimetype="text/csv",
-        headers={"Content-Disposition": "attachment; filename=sky_eco_telemetry.csv"}
-    )
+    total_saved = sum(float(entry.get('saved', 0)) for entry in user_entries)
+    
+    # E-commerce style gallery data
+    gallery_data = [
+        {"id": 1, "title": "Route Optimization", "desc": "Switch to green path to save CO2.", "img": "static/images/route.jpg", "saved": "2,299g"},
+        {"id": 2, "title": "Fleet Upgrade", "desc": "Switch to Electric for max impact.", "img": "static/images/electric.jpg", "saved": "5,000g"},
+        {"id": 3, "title": "Fleet Maintenance", "desc": "Regular checkups reduce emissions.", "img": "static/images/maint.jpg", "saved": "1,500g"}
+    ]
+    
+    return jsonify({
+        "status": "ready",
+        "total_saved": total_saved,
+        "recommendation": f"Current savings: {total_saved}g. Scale your target to 35,000g.",
+        "recommendations": gallery_data
+    })
 
+# 1. Page load karne ke liye (Browser ke liye)
+@app.route('/checkout')
+def checkout_page():
+    return render_template('premium.html')
+@app.route('/contact-sales')
+def contact_sales():
+    return render_template('contact_sales.html')   
+
+@app.route('/api/analyze-fleet', methods=['POST'])
+def analyze_fleet():
+    # 1. Input get karein
+    data = request.get_json()
+    message = data.get("message", "")
+    
+    # 2. Variable define karein (Yehi missing tha!)
+    # agent.optimize aapka original function hai
+    analysis_result = agent.optimize("Diagnostic", message, "eco-ai-bot")
+    
+    # 3. Ab 'analysis_result' defined hai, so hum return kar sakte hain
+    return jsonify({
+        "success": True,
+        "prediction": {
+            "carbon": "14%", 
+            "fuel": "9%"
+        },
+        "report": analysis_result
+    })
+
+
+@app.route('/debug-routes')
+def debug_routes():
+    import urllib
+    output = []
+    for rule in app.url_map.iter_rules():
+        output.append(f"{rule.endpoint}: {rule.rule}")
+    return "<br>".join(output)
+@app.route('/carbon-agent')
+def carbon_agent():
+    if not session.get("user"):
+        return redirect(url_for("login_view"))
+    return render_template("carbon_agent.html")
 # ------------------------------------------------------------------
 # 🚧 ERROR HANDLERS
 # ------------------------------------------------------------------
@@ -621,6 +690,6 @@ def api_export_csv():
 def not_found(e):
     return render_template("404.html"), 404
 
-
+print(os.path.abspath('admin.json'))
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=True, use_reloader=False)

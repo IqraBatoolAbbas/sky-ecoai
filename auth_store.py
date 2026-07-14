@@ -32,7 +32,16 @@ class UserStore:
     def _write(self, data: list) -> None:
         with open(USERS_FILE, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
-
+    # UserStore ke andar ye method ho:
+    def update_user(self, email, new_data): # Sirf 2 arguments!
+        email = email.strip().lower()
+        user_list = self._read()
+        for u in user_list:
+            if u.get("email") == email:
+                u.update(new_data) # Yahan new_data dictionary update ho jayegi
+                self._write(user_list)
+                return self._public(u)
+        raise ValidationError("User not found")
     # --- USER METHODS COMPATIBLE WITH LIST SCHEMA ---
     def create_user(self, name: str, email: str, password: str) -> dict:
         name = (name or "").strip()
@@ -109,8 +118,12 @@ class UserStore:
         user_list = self._read()
         return [self._public(u) for u in user_list]
 
-    def upgrade_to_premium(self, email: str, last_four_digits: str) -> dict:
+    def upgrade_to_premium(self, email: str, last_four_digits: str, plan: str = "premium") -> dict:
         email = (email or "").strip().lower()
+        requested_plan = (plan or "premium").strip().lower()
+        if requested_plan not in {"premium", "pro"}:
+            requested_plan = "premium"
+
         user_list = self._read()
         
         record = None
@@ -122,7 +135,7 @@ class UserStore:
         if not record:
             raise ValidationError("Account not found.")
             
-        record["plan"] = "premium"
+        record["plan"] = requested_plan
         record["card_mask"] = last_four_digits
         self._write(user_list)
         return self._public(record)

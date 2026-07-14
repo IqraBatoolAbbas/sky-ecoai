@@ -165,7 +165,7 @@ button, input, select, textarea { font-family: var(--font-body); }
     border-bottom: 1px solid var(--glass-border); flex-direction: column; align-items: stretch; padding: 14px;
     gap: 4px; transform: translateY(-8px); opacity: 0; pointer-events: none; transition: 0.2s ease;
   }
-  .nav-links.open { transform: translateY(0); opacity: 1; pointer-events: auto; }
+  .nav-links.open { transform: translateY(0); opacity: 1; pointer-events: auto; display: flex; }
   .nav-item, .btn-ghost-nav { text-align: center; }
   .auth-slot { flex-direction: column; width: 100%; }
   .nav-divider { display: none; }
@@ -177,7 +177,8 @@ button, input, select, textarea { font-family: var(--font-body); }
 .content-wrapper { flex: 1; max-width: 1240px; width: 100%; margin: 0 auto; padding: 48px 24px 80px; }
 .glass-card {
   background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-lg);
-  padding: 30px; box-shadow: 0 20px 45px var(--shadow); backdrop-filter: blur(16px);
+  padding: 30px; box-shadow: 0 20px 45px var(--shadow); backdrop-filter: blur(16px);word-wrap: break-word;
+      overflow: hidden; width:100%;
 }
 .tag {
   display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em;
@@ -244,7 +245,15 @@ button, input, select, textarea { font-family: var(--font-body); }
 
 .ecommerce-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
 .product-showcase-card { display: flex; flex-direction: column; overflow: hidden; padding: 0; }
-.product-image-container { height: 170px; background: linear-gradient(135deg, var(--dusk-2), var(--dusk)); position: relative; display: flex; align-items: center; justify-content: center; font-size: 46px; border-bottom: 1px solid var(--glass-border); }
+.product-image-container img {
+    width: 100%;        
+    height: 200px;      
+    object-fit: cover;  
+    border-radius: 8px; 
+    object-position: center;
+    display: block;
+}
+.product-image-container { height: 200px; background: linear-gradient(135deg, var(--dusk-2), var(--dusk)); position: relative; display: flex; align-items: center; justify-content: center; font-size: 46px; border-bottom: 12px 12px 0px 0px solid var(--glass-border); }
 .product-body { padding: 26px; flex: 1; display: flex; flex-direction: column; }
 .product-body h3 { font-size: 18px; }
 .price-tag { font-family: var(--font-mono); font-size: 24px; font-weight: 700; color: var(--horizon); margin: 14px 0 18px; }
@@ -358,9 +367,9 @@ button, input, select, textarea { font-family: var(--font-body); }
 .kpi-delta.up { color: var(--stratos); }
 .kpi-delta.down { color: var(--danger); }
 
-.chart-card { margin-bottom: 26px; padding: 24px; }
+.chart-card { margin-bottom: 26px; padding: 24px;width:100%; min-height:350px; }
 .chart-card-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
-.chart-canvas-wrap { height: 260px; position: relative; }
+.chart-canvas-wrap { height: 300px; position: relative; width:100%;}
 
 .log-table-container { padding: 0; overflow: hidden; }
 .log-table-head-row { display: flex; justify-content: space-between; align-items: center; padding: 22px 26px 0; }
@@ -437,10 +446,29 @@ button, input, select, textarea { font-family: var(--font-body); }
   .landing-hero, .showcase-grid, .quickstart-flex, .ecommerce-gallery, .workspace-grid, .support-grid {
     grid-template-columns: 1fr; flex-direction: column;
   }
+  .account-grid { grid-template-columns: 1fr; }
   .mega-title { font-size: 38px; }
   .route-cards-grid { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: 1fr; }
   .dashboard-metrics-grid { grid-template-columns: 1fr 1fr; }
+  /* Mobile view ke liye CSS */
+
+  .nav-links {
+    display: none; 
+    position: absolute;
+    top: 70px;
+    left: 0;
+    width: 100%;
+    background: var(--void); 
+    flex-direction: column;
+    padding: 20px;
+    z-index: 1000;
+  }
+
+  .nav-links.mobile-active {
+    display: flex !important;
+  }
+
 }
 /* Ensure the dropdown displays strictly when .show class is injected */
 .user-dropdown.show {
@@ -489,6 +517,20 @@ button, input, select, textarea { font-family: var(--font-body); }
 .switch input:checked + .slider { background: var(--horizon); }
 .switch input:checked + .slider::before { transform: translateX(19px); }
 
-@media (max-width: 850px) {
-  .account-grid { grid-template-columns: 1fr; }
+/* Sirf Modal ke liye, baaki UI ko touch nahi karega */
+#salesModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: none; /* JS handle karegi */
+    background: rgba(0,0,0,0.7);
+    z-index: 1000;
+}
+
+#salesModal.active {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }

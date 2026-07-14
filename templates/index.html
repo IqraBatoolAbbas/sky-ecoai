@@ -64,7 +64,9 @@
 <h2 class="section-headline" id="pricing">Our Carbon Fleet Product Layers</h2>
 <section class="ecommerce-gallery">
   <div class="glass-card product-showcase-card">
-    <div class="product-image-container">🌱</div>
+    <div class="product-image-container">
+      <img src="/static/images/basic_node.jpg" alt="Basic" >
+    </div>
     <div class="product-body">
       <h3>Basic Node Optimizer</h3>
       <p>Perfect for individual single-route checks on local ranges.</p>
@@ -79,7 +81,8 @@
   </div>
 
   <div class="glass-card product-showcase-card" style="border-color: var(--horizon);">
-    <div class="product-image-container">🛰️</div>
+    <div class="product-image-container"><img src="/static/images/pro_grid.jpg" alt="Pro" >
+    </div>
     <div class="product-body">
       <h3>Professional Grid Suite</h3>
       <p>Multi-agent tracking, batch route simulation, and exportable history.</p>
@@ -94,7 +97,8 @@
   </div>
 
   <div class="glass-card product-showcase-card">
-    <div class="product-image-container">🏢</div>
+    <div class="product-image-container"><img src="/static/images/enterprise.jpg" alt="Enterprise">
+    </div>
     <div class="product-body">
       <h3>Enterprise Core Infrastructure</h3>
       <p>Dedicated scaling, SSO, and a named engineering contact.</p>
@@ -104,9 +108,12 @@
         <li>Dedicated infrastructure</li>
         <li>SLA-backed support</li>
       </ul>
-      <button class="buy-btn pricing-trigger" data-action="contact" style="background: linear-gradient(90deg, #7aa6ff, #4a86ff); display: block; width: 100%; text-align: center; padding: 12px 0; border-radius: 6px; color: #ffffff; font-weight: 600; border: none; cursor: pointer;">
-        Contact sales 🚀
-      </button>
+      
+    <a href="/contact-sales" 
+   class="buy-btn pricing-trigger" 
+   style="background: linear-gradient(90deg, #7aa6ff, #4a86ff); display: block; width: 100%; text-align: center; padding: 12px 0; border-radius: 6px; color: #ffffff; font-weight: 600; text-decoration: none; cursor: pointer;">
+   Contact sales 🚀
+    </a>
     </div>
   </div>
 </section>
@@ -144,26 +151,28 @@
     } catch (e) {
       console.error("Home page counter integration exception:", e);
     }
+  
 
-    /* ---------------- 🎯 CENTRALIZED PRICING BUTTON HANDLER ---------------- */
-    document.querySelectorAll(".pricing-trigger").forEach((element) => {
-      element.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        const targetAction = e.currentTarget.getAttribute("data-action");
-
-        if (targetAction === "contact") {
-          window.location.href = "mailto:sales@skyeco.ai?subject=Enterprise%20Inquiry";
-        } else if (targetAction === "checkout") {
-          if (typeof showStatus === "function") {
-            showStatus("Initiating Enterprise Checkout Matrix...");
-          } else {
-            console.log("Initiating Enterprise Checkout Matrix...");
-          }
+  
+  /* ---------------- 🔄 REFRESH & ACCOUNT UPDATE LOGIC ---------------- */
+  
+  function handleSavePreferences(event) {
+    event.preventDefault();
+    // Assuming you have an AJAX call to /update_profile
+    fetch('/update_profile', {
+        method: 'POST',
+        body: new FormData(event.target)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.success) {
+            alert(data.message);
+            window.location.reload(); // Page refresh to update name/data
+        } else {
+            alert("Error: " + data.message);
         }
-      });
     });
-  });
+  }
+});
 </script>
 {% endblock %}

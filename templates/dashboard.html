@@ -24,17 +24,20 @@
     <button class="filter-pill" data-engine="electric">Electric</button>
     <button class="filter-pill" data-engine="favorites">★ Favorites</button>
   </div>
-  <div class="toolbar-actions">
-    {% if session.get('is_premium') or session.get('is_pro') or current_user.plan in ['premium', 'pro'] %}
+  {% set user = session.get('user', {}) %}
+{% set is_premium_user = session.get('is_premium') or user.get('plan') in ['premium', 'pro'] %}
+
+<div class="toolbar-actions">
+    {% if is_premium_user %}
       <button class="icon-btn" id="exportCsvBtn">⭳ Export CSV</button>
     {% else %}
-      <button class="icon-btn" id="exportCsvBtn" style="opacity: 0.5; cursor: not-allowed;" title="Premium feature" disabled>
+      <button class="icon-btn" id="exportCsvBtn" style="opacity: 0.5; cursor: not-allowed;" disabled>
         🔒 Export CSV (Premium)
       </button>
     {% endif %}
     <button class="icon-btn" id="refreshBtn">⟳ Refresh</button>
-  </div>
 </div>
+
 
 <div class="dashboard-metrics-grid">
   <div class="glass-card analytic-kpi">

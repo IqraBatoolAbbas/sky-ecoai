@@ -33,11 +33,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             <span class="engine-badge ${isAnswered ? 'electric' : 'petrol'}">${(t.status || 'pending').toUpperCase()}</span>
           </div>
           <div style="font-size:12.5px; color:var(--text-faint); margin:8px 0 14px;">${t.category} · dispatched ${timeAgo(t.created_at)}</div>
-          <p style="color:var(--text-main); margin-bottom:${ticketResponse ? '14px' : '0'};">${t.message}</p>
+          <p style="color:var(--text-main); margin-bottom:${ticketResponse ? '14px' : '0'};word-wrap: break-word; overflow-wrap: break-word; white-space: pre-wrap;">${t.message}</p>
           ${ticketResponse ? `
             <div style="background:var(--glass-bg-strong); border-left:3px solid var(--stratos); border-radius:8px; padding:12px 16px;">
               <div style="font-size:12px; font-weight:700; color:var(--stratos); margin-bottom:6px;">ADMIN RESPONSE · ${timeAgo(responseTime)}</div>
-              <p style="margin:0; color:var(--text-main);">${ticketResponse}</p>
+              <p style="margin:0; color:var(--text-main);word-wrap: break-word; overflow-wrap: break-word; white-space: pre-wrap;">${ticketResponse}</p>
             </div>` : `<div style="font-size:12.5px; color:var(--text-faint); margin-top:10px;">Awaiting a response from the support desk.</div>`}
         </div>
       `;

@@ -150,20 +150,35 @@ document.addEventListener("DOMContentLoaded", () => {
       // ===================================================================================
       // UPDATED TELEMETRY WRITER: Synchronizes perfectly with dashboard.js & index.html
       // ===================================================================================
-      const ledger = JSON.parse(localStorage.getItem("sky_eco_ledger") || "[]");
-      ledger.push({
+      // ===================================================================================
+      // UPDATED TELEMETRY WRITER: Synchronizes with server-side API & LocalStorage
+      // ===================================================================================
+      const tripData = {
         id: Date.now(),
         userId: currentUserId,
         query: `${data.source} ➔ ${data.destination}`,
-        engine: (data.vehicle || form.elements["vehicle"].value).toLowerCase(), // Lowercased for dashboard filters match
+        engine: (data.vehicle || form.elements["vehicle"].value).toLowerCase(),
         sprintCo2: data.routes.sprint.co2,
         greenCo2: data.routes.green.co2,
         saved: data.savings.co2,
-        savings: {
-          co2: data.savings.co2 // Added object structural mapping wrapper for index.html home counter sync
-        },
+        savings: { co2: data.savings.co2 },
         favorite: false
-      });
+      };
+
+      // 1. Send to Backend API for Server-side persistence (Forecasting Agent sync)
+      try {
+        await fetch("/api/ledger", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(tripData)
+        });
+      } catch (err) {
+        console.warn("Server sync skipped, using local-only mode:", err);
+      }
+
+      // 2. Save to LocalStorage for immediate UI performance
+      const ledger = JSON.parse(localStorage.getItem("sky_eco_ledger") || "[]");
+      ledger.push(tripData);
       localStorage.setItem("sky_eco_ledger", JSON.stringify(ledger));
       
       // Update history list and metrics bar right away
@@ -181,7 +196,6 @@ document.addEventListener("DOMContentLoaded", () => {
       await mapPromise;
     }
   });
-
   /* ---------------- FIXED FAVORITE ACTION + AUTH GATEWAY GUARD ---------------- */
   document.getElementById("favoriteBtn").addEventListener("click", (e) => {
     if (!lastResult) return;

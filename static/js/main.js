@@ -108,26 +108,30 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  /* ---------------- NAVBAR & MOBILE TOGGLE PROTOCOLS ---------------- */
-  const navToggle = document.querySelector(".nav-toggle-btn");
-  const navMenu = document.querySelector(".nav-links-wrapper");
+console.log("main.js load ho gaya!");
 
-  if (navToggle && navMenu) {
+const navToggle = document.getElementById("navToggle");
+const navMenu = document.getElementById("navLinks");
+
+// IF CHECK: Agar navToggle milta hai, tabhi listener lagao
+if (navToggle && navMenu) {
     navToggle.addEventListener("click", () => {
-      navMenu.classList.toggle("mobile-active");
-      navToggle.classList.toggle("open");
+        console.log("Button click hua!");
+        navMenu.classList.toggle("open");
     });
+} else {
+    console.warn("navToggle ya navMenu nahi mila - shayad ye page par nahi hai.");
+}
+
+/* ---------------- ACTIVE ROUTE ANCHOR HIGHLIGHTING ---------------- */
+const path = window.location.pathname;
+document.querySelectorAll(".nav-link").forEach(link => {
+  if (link.getAttribute("href") === path) {
+    link.classList.add("active-route-node");
   }
+});
 
-  /* ---------------- ACTIVE ROUTE ANCHOR HIGHLIGHTING ---------------- */
-  const path = window.location.pathname;
-  document.querySelectorAll(".nav-link").forEach(link => {
-    if (link.getAttribute("href") === path) {
-      link.classList.add("active-route-node");
-    }
-  });
-
-  /* ---------------- USER DROPDOWN DIRECT TOGGLE PROTOCOL ---------------- */
+  
   /* ---------------- USER DROPDOWN REDIRECTION PROTOCOLS ---------------- */
   const userChipBtn = document.getElementById("userChipBtn");
   const userDropdown = document.getElementById("userDropdown");
@@ -157,11 +161,4 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-  /* ---------------- 🚀 ENTERPRISE BYPASS PROTOCOL ---------------- */
-  document.addEventListener("click", (e) => {
-    const actionBtn = e.target.closest(".buy-btn") || e.target.closest(".pricing-trigger");
-    if (actionBtn && (actionBtn.getAttribute("data-action") === "contact" || actionBtn.textContent.toLowerCase().includes("contact"))) {
-      e.stopPropagation(); // Captures click and stops other script pipelines from crashing it
-    }
-  });
 });

@@ -122,10 +122,10 @@
       btnHist.className = "primary-btn";        
       btnNew.className = "secondary-ghost-btn"; 
       
-      await loadInlineTickets();
+      await loadInlines();
     });
 
-    async function loadInlineTickets() {
+    async function loadInlines() {
       try {
         historyList.innerHTML = `<p style="color:var(--text-faint); font-size:13px;">Fetching dynamic telemetry updates...</p>`;
         const res = await fetch("/api/my-tickets");

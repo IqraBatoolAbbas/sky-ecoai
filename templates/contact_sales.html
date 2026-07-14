@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Sales — Sky.EcoAI{% endblock %}
+
+{% block content %}
+<div class="sales-page-wrapper" style="padding: 60px 20px; display: flex; justify-content: center; min-height: 80vh;">
+    <div class="card" style="width: 100%; max-width: 500px; padding: 40px; border-radius: 12px; background: #1e293b;">
+        <h2 style="margin-bottom: 10px; color: white;">Contact Sales 🚀</h2>
+        <p style="margin-bottom: 30px; color: #94a3b8;">Describe your fleet needs and our engineering team will reach out shortly.</p>
+        
+        <form id="salesForm" onsubmit="event.preventDefault();">
+            <input type="email" id="email" placeholder="Work Email" required style="width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white;">
+            
+            <textarea id="message" placeholder="What are your fleet requirements?" required style="width: 100%; padding: 12px; height: 100px; margin-bottom: 20px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white;"></textarea>
+            
+            <div style="border-top: 1px solid #334155; padding-top: 20px; margin-bottom: 20px;">
+                <h3 style="color: #7aa6ff; font-size: 18px;">AI Fleet Diagnostic Engine 🚀</h3>
+                <textarea id="fleetData" placeholder="Enter route (e.g., Lahore to Karachi, 10 trucks)..." style="width: 100%; height: 80px; background: #0f172a; border: 1px solid #334155; color: white; padding: 10px; border-radius: 8px; margin: 10px 0;"></textarea>
+                
+                <button type="button" id="simBtn" onclick="runDiagnostic()" style="width: 100%; padding: 12px; background: #334155; border: none; border-radius: 6px; color: white; cursor: pointer;">
+                    Simulate Savings
+                </button>
+
+                <div id="outputSection" style="display: none; background: #0f172a; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #7aa6ff; text-align: center;">
+                    <h3 id="carbonVal" style="color: #7aa6ff; margin: 0;">--</h3>
+                    <p style="font-size: 12px; color: #94a3b8;">Carbon Reduction Potential</p>
+                </div>
+            </div>
+             
+            <button type="button" onclick="submitSales()" style="width: 100%; padding: 15px; background: linear-gradient(90deg, #7aa6ff, #4a86ff); border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer;">
+                Submit Inquiry
+            </button>
+            <div id="summaryView" style="display:none; padding:20px; border:1px solid #7aa6ff; border-radius:10px;">
+    <h3>Your Submission Summary</h3>
+    <p><strong>Message:</strong> <span id="userMsg"></span></p>
+    <p><strong>AI Prediction:</strong> <span id="aiResult"></span></p>
+    <p><em>Waiting for Admin Response...</em></p>
+</div>
+        </form>
+    </div>
+</div>
+
+<script>
+async function runAgent() {
+    const status = document.getElementById('agentStatus');
+    const board = document.getElementById('predictionBoard');
+    
+    try {
+        status.innerText = "Connecting to Ledger...";
+        
+        // API call
+        const res = await fetch('/api/agent/predict');
+        
+        if (!res.ok) throw new Error("API response error");
+        
+        const data = await res.json();
+        console.log("Agent Data:", data); // F12 (Console) mein check karein
+        
+        if (data.status === "waiting") {
+            status.innerText = "Waiting for trip data...";
+            return;
+        }
+        
+        // Success: UI update
+        status.innerText = "Agentic Insight Generated.";
+        document.getElementById('agentInsightText').innerText = 
+            `Your fleet has saved ${data.total_saved}g of CO2. ${data.recommendation}`;
+        board.style.display = 'block';
+        
+    } catch (err) {
+        console.error(err);
+        status.innerText = "Agent Connection Failed: Check API.";
+    }
+}
+runAgent();
+</script>
+{% endblock %}
