@@ -53,11 +53,11 @@ Sky.EcoAI applies an agentic AI concept in these flows:
 
 ### Real-Time Route Optimization
 The dashboard provides a side-by-side comparison of "Velocity" vs "Optimized Eco" paths, allowing fleet managers to make immediate carbon-aware decisions.
-![Route Comparison](static/images/route_comparison.jpg)
+![Route Comparison](static/images/route_comparison.png)
 
 ### Sustainability Performance Dashboard
 Our integrated telemetry dashboard tracks cumulative CO2 savings and allows for automated data exports, turning audit history into actionable business intelligence.
-![Sustainability Dashboard](static/images/sustainability_dashboard.jpg)
+![Sustainability Dashboard](static/images/sustainability_dashboard.png)
 
 ### Persistent Ledger
 
