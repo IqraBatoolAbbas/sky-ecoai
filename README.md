@@ -193,20 +193,20 @@ Update this admin password immediately in a production deployment.
 - Confirm `data/` directory exists and is writable before running the app.
 - If you want to enable real ADK integration, install `google-adk` and remove the fallback only after verifying compatibility.
 
-🚀 Live Demo
+### 🚀 Live Demo
 You can view the project in action here:
 
-👉 View Live Application
+👉 View Live Application:sky-ecoai-57miybkjw-iqra15.vercel.app
 
 (Note: Click the link to explore the interface and test the application's features.)
 
-🛠️ Deployment Details
+### 🛠️ Deployment Details
 This project is optimized for performance and reliability:
 
-Platform: Vercel (Cloud Hosting)
+- Platform: Vercel (Cloud Hosting)
 
-Backend: Flask (Python)
+- Backend: Flask (Python)
 
-Frontend: HTML, CSS, JavaScript
+- Frontend: HTML, CSS, JavaScript
 
-Status: ✅ Live & Operational
+- Status: ✅ Live & Operational
