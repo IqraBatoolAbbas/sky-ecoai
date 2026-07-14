@@ -196,7 +196,7 @@ Update this admin password immediately in a production deployment.
 ### 🚀 Live Demo
 You can view the project in action here:
 
-👉 View Live Application:sky-ecoai-57miybkjw-iqra15.vercel.app
+👉 View Live Application: sky-ecoai-57miybkjw-iqra15.vercel.app
 
 (Note: Click the link to explore the interface and test the application's features.)
 
