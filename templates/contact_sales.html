@@ -41,6 +41,7 @@
 </div>
 
 <script>
+document.addEventListener("DOMContentLoaded", function() {
 async function runAgent() {
     const status = document.getElementById('agentStatus');
     const board = document.getElementById('predictionBoard');
@@ -73,5 +74,6 @@ async function runAgent() {
     }
 }
 runAgent();
+});
 </script>
 {% endblock %}
