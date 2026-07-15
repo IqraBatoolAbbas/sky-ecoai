@@ -41,39 +41,68 @@
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-async function runAgent() {
-    const status = document.getElementById('agentStatus');
-    const board = document.getElementById('predictionBoard');
-    
+// Functions ko window object ke sath attach karein taake onclick unhein dhoond sake
+window.runDiagnostic = async function() {
+    const outputSection = document.getElementById('outputSection');
+    const carbonVal = document.getElementById('carbonVal');
+    const fleetData = document.getElementById('fleetData').value;
+
+    if (!fleetData) {
+        alert("Please enter fleet requirements first!");
+        return;
+    }
+
     try {
-        status.innerText = "Connecting to Ledger...";
-        
-        // API call
-        const res = await fetch('/api/agent/predict');
-        
-        if (!res.ok) throw new Error("API response error");
+        carbonVal.innerText = "Analyzing...";
+        outputSection.style.display = 'block';
+
+        const res = await fetch('/api/analyze-fleet', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ message: fleetData })
+        });
         
         const data = await res.json();
-        console.log("Agent Data:", data); // F12 (Console) mein check karein
-        
-        if (data.status === "waiting") {
-            status.innerText = "Waiting for trip data...";
-            return;
+        if (data.success) {
+            carbonVal.innerText = data.prediction.carbon + " Reduction";
+            document.getElementById('aiResult').innerText = data.prediction.carbon;
         }
-        
-        // Success: UI update
-        status.innerText = "Agentic Insight Generated.";
-        document.getElementById('agentInsightText').innerText = 
-            `Your fleet has saved ${data.total_saved}g of CO2. ${data.recommendation}`;
-        board.style.display = 'block';
-        
     } catch (err) {
-        console.error(err);
-        status.innerText = "Agent Connection Failed: Check API.";
+        carbonVal.innerText = "Error";
     }
-}
-runAgent();
-});
+};
+
+window.submitSales = async function() {
+    const btn = document.querySelector('button[onclick="submitSales()"]');
+    const msg = document.getElementById('message').value;
+    
+    btn.innerText = "Sending...";
+    btn.disabled = true;
+
+    try {
+        const res = await fetch('/api/support/ticket', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ 
+                email: document.getElementById('email').value, 
+                category: "Sales", 
+                message: msg 
+            })
+        });
+        
+        if (res.ok) {
+            alert("Inquiry Sent Successfully!");
+            document.getElementById('summaryView').style.display = 'block';
+            document.getElementById('userMsg').innerText = msg;
+            btn.innerText = "Sent!";
+        } else {
+            alert("Please login first.");
+        }
+    } catch (err) {
+        alert("Failed to connect.");
+    } finally {
+        btn.disabled = false;
+    }
+};
 </script>
 {% endblock %}
