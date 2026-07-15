@@ -174,6 +174,44 @@ Update this admin password immediately in a production deployment.
 4. The backend calls `EcoRouteAgent.optimize(...)` to compute sprint and green route metrics.
 5. Save the result to the persistent ledger for later analysis and export.
 
+---
+
+## ⚙️ Core Logic & Agentic Workflow
+
+Sky.EcoAI moves beyond static automation by implementing a reasoning loop that processes environmental data dynamically.
+
+### 1. Mathematical Carbon Calculation
+The engine calculates the **Carbon Reduction Potential ($CRP$)** using a weighted model:
+
+$$CRP = \sum_{i=1}^{n} (E_{base} - E_{optimized}) \times D_i \times L_f$$
+
+* **$E_{base}$**: Baseline emission factor per km.
+* **$E_{optimized}$**: Optimized emission factor (post-AI intervention).
+* **$D_i$**: Distance of the route segment.
+* **$L_f$**: Load factor adjustment.
+
+### 2. The Agentic Reasoning Loop
+The system follows a sequential decision-making process:
+1. **Input Acquisition:** Captures raw route/fleet requirements.
+2. **Semantic Parsing:** Tokenizes inputs to identify vehicle constraints.
+3. **Diagnostic Reasoning:** Cross-references inputs against the $CRP$ model.
+4. **Actionable Synthesis:** Generates tailored, eco-conscious route recommendations.
+
+---
+
+## 🛡 Technical Breakdown: The Vercel Deployment Fix
+
+To handle Flask in a **stateless** Vercel environment, I implemented a custom `vercel.json` configuration to ensure seamless serverless routing:
+
+```json
+{
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index.py" },
+    { "source": "/(.*)", "destination": "/app.py" }
+  ]
+}
+By configuring this proxy, I successfully maintained session continuity for the AI agent, overcoming the limitations of stateless cloud execution.
+
 ### Persistent Ledger and Telemetry Flow
 
 - After route optimization, route details can be stored with user email in `data/ledger.json`.
