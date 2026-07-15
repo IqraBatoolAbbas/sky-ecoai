@@ -1,7 +1,7 @@
 # Sky.EcoAI
 
 Sky.EcoAI is a Fleet Logistics SaaS application built as a Python Flask project. It combines an agentic AI route optimization engine, a persistent ledger for fleet telemetry and trip history, and backend telemetry processing to support carbon-aware route planning, fleet analytics, and support automation.
-[![Watch the Demo Video](https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)
+
 ## Overview
 
 Sky.EcoAI is designed for logistics operators, fleet managers, and transportation planners who want to compare efficient route alternatives, capture route history, and analyze backend telemetry through an integrated SaaS-style experience.
