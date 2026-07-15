@@ -199,18 +199,15 @@ The system follows a sequential decision-making process:
 
 ---
 
-## 🛡 Technical Breakdown: The Vercel Deployment Fix
+### Technical Breakdown: The Vercel Deployment Fix
 
 To handle Flask in a **stateless** Vercel environment, I implemented a custom `vercel.json` configuration to ensure seamless serverless routing:
-
-```json
-{
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index.py" },
-    { "source": "/(.*)", "destination": "/app.py" }
-  ]
+     json{
+     "rewrites": [
+        { "source": "/api/(.*)", "destination": "/api/index.py" },
+       { "source": "/(.*)", "destination": "/app.py" }
+        ]
 }
-By configuring this proxy, I successfully maintained session continuity for the AI agent, overcoming the limitations of stateless cloud execution.
 
 ### Persistent Ledger and Telemetry Flow
 
