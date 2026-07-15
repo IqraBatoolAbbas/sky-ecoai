@@ -13,7 +13,7 @@ from datetime import timedelta
 
 app = Flask(__name__)
 app.permanent_session_lifetime = timedelta(days=30)
-app.secret_key = secrets.token_hex(32)  # 🔐 Swap for a fixed env-var secret in production
+app.secret_key = 'a-very-secret-and-fixed-string-123456789'
 
 agent = EcoRouteAgent()
 users = UserStore()
@@ -76,9 +76,9 @@ def about_view():
     return render_template("about.html")
 
 
-# ------------------------------------------------------------------
-# 🔐 AUTH — PAGE ROUTES
-# ------------------------------------------------------------------
+
+#  AUTH — PAGE ROUTES
+
 @app.get("/login")
 def login_view():
     if session.get("user"):
@@ -115,9 +115,9 @@ def my_tickets_view():
     return render_template("my_tickets.html")
 
 
-# ------------------------------------------------------------------
-# 🔐 AUTH — API ROUTES
-# ------------------------------------------------------------------
+
+#  AUTH — API ROUTES
+
 @app.post("/api/signup")
 def api_signup():
     data = request.get_json(silent=True) or {}
@@ -207,9 +207,8 @@ def api_update_account():
         # Agar error yahan bhi show na ho, toh print karein
         print(f"DEBUG: {str(e)}") 
         return jsonify({"error": f"Account Update Error: {str(e)}"}), 500
-# ------------------------------------------------------------------
-# 📒 PER-ACCOUNT LEDGER (Persisted Server-Side)
-# ------------------------------------------------------------------
+
+#  PER-ACCOUNT LEDGER (Persisted Server-Side)
 @app.get("/api/ledger")
 def api_get_ledger():
     if not session.get("user"):
